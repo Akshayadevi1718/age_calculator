@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGE Calculator</title>
+    <style>
+       
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #030712; 
+            color: #f3f4f6;            
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+      
+        .bg-clock {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            color: rgba(6, 182, 212, 0.04); /* Subtly integrated color */
+            filter: drop-shadow(0 0 25px rgba(6, 182, 212, 0.08)); /* Neon mist aura */
+        }
+
+        /* Left Side: Massive Ancient Astrolabe / Gear Wheel */
+        .clock-left {
+            left: -8%;
+            top: 15%;
+            width: 480px;
+            height: 480px;
+            transform: rotate(-15deg);
+            animation: slowSpinCounter 180s linear infinite;
+        }
+
+        /* Right Side: Ornate Roman Numeral Pendulum Clock */
+        .clock-right {
+            right: -5%;
+            bottom: 10%;
+            width: 420px;
+            height: 420px;
+            transform: rotate(12deg);
+            animation: slowSpinClock 140s linear infinite;
+        }
+
+        /* Floating Gear Accent */
+        .gear-accent {
+            left: 12%;
+            bottom: -5%;
+            width: 220px;
+            height: 220px;
+            color: rgba(59, 130, 246, 0.03); /* Electric Blue hint */
+            filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.05));
+            animation: slowSpinClock 90s linear infinite;
+        }
+
+        .box {
+            background-color: rgba(11, 15, 25, 0.85); 
+            border: 2px solid #1f2937;  
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            width: 360px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px); /* Blurred reveal of rotating gears */
+            -webkit-backdrop-filter: blur(12px);
+            position: relative;
+            z-index: 10;
+            animation: proSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .dashboard-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Navigation Header */
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #1f2937;
+            padding-bottom: 12px;
+        }
+
+        .back-nav {
+            font-size: 28px;
+            font-weight: bold;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            line-height: 1;
+        }
+        .back-nav:hover {
+            color: #06b6d4; 
+            transform: scale(1.2);
+        }
+        .back-nav:active { transform: scale(0.9); }
+
+        .header-title {
+            color: #9ca3af; 
+            margin: 0; 
+            font-size: 14px; 
+            letter-spacing: 1px; 
+            text-transform: uppercase;
+        }
+
+        /* Components Styles */
+        .form-field { margin-bottom: 20px; text-align: left; }
+        label {
+            display: block;
+            font-weight: 600;
+            color: #9ca3af;
+            margin-bottom: 6px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        input {
+            width: 93%;
+            padding: 12px;
+            background-color: #111827;
+            border: 2px solid #1f2937;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #ffffff;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        input:focus {
+            border-color: #06b6d4; 
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+            background-color: #0b0f19;
+            outline: none;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #06b6d4, #3b82f6); 
+            color: #ffffff;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+        }
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
+        }
+
+        .calc-screen {
+            background-color: #111827;
+            color: #06b6d4; 
+            font-size: 38px;
+            font-weight: 700;
+            padding: 18px;
+            text-align: right;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #1f2937;
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.3); 
+        }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .calc-grid button {
+            padding: 16px 0;
+            background-color: #1f2937;
+            color: #f3f4f6;
+            border: 1px solid transparent;
+            font-size: 22px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+        .calc-grid button:hover { background-color: #374151; color: #ffffff; }
+        .calc-grid button:active { transform: scale(0.92); background-color: #111827; }
+        .calc-grid button.clear-btn { background-color: #27161a; color: #ef4444; }
+        .calc-grid button.clear-btn:hover { background-color: #ef4444; color: #ffffff; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        .calc-grid button.equal-btn { background-color: #10b981; color: #ffffff; font-weight: 700; }
+        .calc-grid button.equal-btn:hover { background-color: #059669; box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+
+        .counter-display {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            background-color: #111827;
+            padding: 18px;
+            border-radius: 8px;
+            margin-top: 10px;
+            line-height: 1.6;
+            border: 2px solid #1f2937;
+            animation: glowPulse 3s infinite ease-in-out;
+        }
+
+        .countdown-number {
+            font-size: 110px;
+            font-weight: 900;
+            background: linear-gradient(to right, #06b6d4, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 15px 0;
+            display: inline-block;
+            animation: zoomPop 1s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+        }
+
+        
+        @keyframes proSlideUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes zoomPop {
+            0% { transform: scale(0.4); opacity: 0; }
+            40% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+        @keyframes glowPulse {
+            0%, 100% { border-color: #1f2937; box-shadow: 0 0 0px rgba(0,0,0,0); }
+            50% { border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.2); }
+        }
+        @keyframes slowSpinClock {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes slowSpinCounter {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <svg class="bg-clock clock-left" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="1"/>
+        <circle cx="50" cy="50" r="41" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="1, 1"/>
+        <circle cx="50" cy="50" r="32" fill="none" stroke="currentColor" stroke-width="0.75"/>
+        <path d="M 9 50 L 91 50 M 50 9 L 50 91" stroke="currentColor" stroke-width="0.5"/>
+        <path d="M 20 20 L 80 80 M 20 80 L 80 20" stroke="currentColor" stroke-width="0.25" stroke-dasharray="2, 2"/>
+        <circle cx="50" cy="50" r="12" fill="none" stroke="currentColor" stroke-width="0.75"/>
+        <circle cx="50" cy="50" r="6" fill="none" stroke="currentColor" stroke-width="1"/>
+        <path d="M50 2 L50 5 M53 2.3 L51.5 5.2 M56 3 L53.5 5.8 M75 12 L72.5 14.5 M88 25 L85 27" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+    </svg>
+
+    <svg class="bg-clock clock-right" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="0.5"/>
+        <path d="M50 5 L50 10 M50 95 L50 90 M5 50 L10 50 M95 50 L90 50" stroke="currentColor" stroke-width="1"/>
+        <path d="M50 50 L50 22 M50 50 L72 45" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+        <circle cx="50" cy="50" r="4" fill="currentColor"/>
+        <path d="M46 44 C 40 38, 38 48, 44 46 C 48 52, 52 40, 46 44 Z" fill="none" stroke="currentColor" stroke-width="0.5"/>
+    </svg>
+
+    <svg class="bg-clock gear-accent" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="50" cy="50" r="10" fill="none" stroke="currentColor" stroke-width="1"/>
+        <path d="M50 10 L50 90 M10 50 L90 50 M22 22 L78 78 M22 80 L78 22" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+
+    <div id="screen-1" class="box">
+        <h2 style="color: #ffffff; margin-top:0; font-weight: 800; letter-spacing: -0.5px;">TIMESPENT ON EARTH</h2>
+        <p style="color: #6b7280; margin-bottom: 25px; font-size: 15px;">Enter your Details to know!! </p>
+        <div class="form-field">
+            <label for="name-input">NAME</label>
+            <input type="text" id="name-input" placeholder="Your name..">
+        </div>
+        <div class="form-field">
+            <label for="dob-input">DATE OF BIRTH</label>
+            <input type="datetime-local" id="dob-input">
+        </div>
+        <button class="btn-main" onclick="goToCountdown()">LET'S GOO!!</button>
+    </div>
+
+    <div id="screen-2" class="box" style="display: none;">
+        <h2 id="welcome-title" style="color: #9ca3af; margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px;">WELCOME!</h2>
+        <div id="countdown-box" class="countdown-number">3</div>
+    </div>
+
+    <div id="screen-3" class="dashboard-layout" style="display: none;">
+        
+        <div class="box">
+            <div class="dashboard-header">
+                <div class="back-nav" onclick="goBackToInputs()">←</div>
+                <h3 class="header-title">YOUR TIME SPENT ON EARTH</h3>
+            </div>
+            <div id="user-display" style="color: #ffffff; font-size: 26px; font-weight: 800; margin-bottom: 15px; text-align: left; padding-left: 5px;"></div>
+            <div id="counter-box" class="counter-display">Computing relative runtime...</div>
+        </div>
+
+        <div class="box">
+            <h3 style="color: #9ca3af; margin-top: 0; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; text-align: left; margin-bottom: 12px;">CALCULATOR</h3>
+            <div id="screen-display" class="calc-screen">0</div>
+            <div class="calc-grid">
+                <button class="clear-btn" onclick="pressKey('C')">C</button>
+                <button onclick="pressKey('/')">÷</button>
+                <button onclick="pressKey('*')">×</button>
+                <button onclick="pressKey('-')">−</button>
+                
+                <button onclick="pressKey('7')">7</button>
+                <button onclick="pressKey('8')">8</button>
+                <button onclick="pressKey('9')">9</button>
+                <button onclick="pressKey('+')">+</button>
+                
+                <button onclick="pressKey('4')">4</button>
+                <button onclick="pressKey('5')">5</button>
+                <button onclick="pressKey('6')">6</button>
+                <button class="equal-btn" onclick="pressKey('=')">=</button>
+                
+                <button onclick="pressKey('1')">1</button>
+                <button onclick="pressKey('2')">2</button>
+                <button onclick="pressKey('3')">3</button>
+                <button onclick="pressKey('0')" style="grid-column: span 2; width: 100%;">0</button>
+                
+                <button onclick="pressKey('.')">.</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userBirthDate;
+        let clockInterval; 
+        let calculatorScreen = document.getElementById("screen-display");
+
+        function goToCountdown() {
+            let nameValue = document.getElementById("name-input").value;
+            let dobValue = document.getElementById("dob-input").value;
+
+            if (nameValue === "" || dobValue === "") {
+                alert("Authentication mismatch. Complete all modules, bro!");
+                return;
+            }
+
+            userBirthDate = new Date(dobValue);
+            document.getElementById("user-display").innerText = nameValue;
+
+            document.getElementById("screen-1").style.display = "none";
+            document.getElementById("screen-2").style.display = "block";
+
+            let count = 3;
+            let timerElement = document.getElementById("countdown-box");
+            timerElement.innerText = count;
+
+            let countdownInterval = setInterval(function() {
+                count--;
+                if (count > 0) {
+                    timerElement.innerText = count;
+                    timerElement.style.animation = 'none';
+                    timerElement.offsetHeight; 
+                    timerElement.style.animation = 'zoomPop 1s cubic-bezier(0.34, 1.56, 0.64, 1) infinite';
+                } else {
+                    clearInterval(countdownInterval);
+                    document.getElementById("screen-2").style.display = "none";
+                    document.getElementById("screen-3").style.display = "flex";
+                    clockInterval = setInterval(runLiveCounter, 1000);
+                }
+            }, 1000);
+        }
+
+        function goBackToInputs() {
+            clearInterval(clockInterval);
+            calculatorScreen.innerText = "0";
+            document.getElementById("screen-3").style.display = "none";
+            document.getElementById("screen-1").style.display = "block";
+        }
+
+        function runLiveCounter() {
+            let now = new Date();
+            let differenceInMs = now - userBirthDate;
+
+            if (differenceInMs < 0) {
+                document.getElementById("counter-box").innerText = "Anchor point set in future timeline.";
+                return;
+            }
+
+            let totalSeconds = Math.floor(differenceInMs / 1000);
+            let totalMinutes = Math.floor(totalSeconds / 60);
+            let totalHours = Math.floor(totalMinutes / 60);
+            let totalDays = Math.floor(totalHours / 24);
+
+            let years = Math.floor(totalDays / 365);
+            let remainingDays = totalDays % 365;
+            let hours = totalHours % 24;
+            let minutes = totalMinutes % 60;
+            let seconds = totalSeconds % 60;
+
+            document.getElementById("counter-box").innerHTML = 
+                years + " Years, " + remainingDays + " Days, <br>" + 
+                hours + "h : " + minutes + "m : " + seconds + "s";
+        }
+
+        function pressKey(key) {
+            if (key === "C") {
+                calculatorScreen.innerText = "0";
+            } else if (key === "=") {
+                try {
+                    calculatorScreen.innerText = eval(calculatorScreen.innerText);
+                } catch (error) {
+                    calculatorScreen.innerText = "Error";
+                }
+            } else {
+                if (calculatorScreen.innerText === "0" || calculatorScreen.innerText === "Error") {
+                    calculatorScreen.innerText = key;
+                } else {
+                    calculatorScreen.innerText = calculatorScreen.innerText + key;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
